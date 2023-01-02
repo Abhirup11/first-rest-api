@@ -9,13 +9,17 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
 
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+
+import ch.qos.logback.classic.Logger;
 
 @Service
 public class SurveyService {
 
 	private static List<Survey> surveys = new ArrayList<>();
 
+	 final static Logger logger = (Logger) LoggerFactory.getLogger(SurveyService.class); 
 	static {
 
 		Question question1 = new Question("Question1", "Most Popular Cloud Platform Today",
@@ -34,6 +38,7 @@ public class SurveyService {
 	}
 
 	public List<Survey> retriveAllSurveys() {
+		logger.info("Retrieve all surveys : START");
 		return surveys;
 	}
 
@@ -45,6 +50,7 @@ public class SurveyService {
 		 * optionalSurvey=surveys.stream().filter(predicate).findFirst();
 		 * if(optionalSurvey.isEmpty()) return null; return optionalSurvey.get();
 		 */
+		logger.info("Retrieve survey by ID : START");
 		for (Survey survey : surveys) {
 			if (survey.getId().equals(surveyId)) {
 				return survey;
@@ -55,8 +61,10 @@ public class SurveyService {
 	}
 
 	public List<Question> retriveQuestionsBySurveyId(String surveyId) {
+		logger.info("retriveQuestionsBySurveyId START");
 		for (Survey survey : surveys) {
 			if (survey.getId().equals(surveyId)) {
+				logger.info("retriveQuestionsBySurveyId START");
 				return survey.getQuestions();
 			}
 		}
@@ -79,7 +87,7 @@ public class SurveyService {
 	public String addNewQuestionBySurveyId(String surveyId, Question question) {
 		
 		List<Question> retriveQuestionsBySurveyId = retriveQuestionsBySurveyId(surveyId);
-		question.setId(generateQuestionId());
+//		question.setId(generateQuestionId());
 		
 		if(retriveQuestionsBySurveyId==null)
 					return null;
@@ -109,6 +117,21 @@ public class SurveyService {
 			}
 		}
 		return exactMatchingQuestion;
+	}
+
+	public String updateSurveyQuestion(String surveyId, Question question, String questionId) {
+		List<Question> retriveQuestionsBySurveyId = retriveQuestionsBySurveyId(surveyId);
+		Iterator<Question> questions = retriveQuestionsBySurveyId.iterator();
+		while(questions.hasNext()) {
+			if(questions.next().getId().equals(questionId)) {
+//				question.setId(questionId);
+				logger.info("Found questionId {} in the SurveyId {}",questionId,surveyId);
+				questions.remove();
+				logger.info("Successfully removed.");
+			}
+		}
+		return(addNewQuestionBySurveyId(surveyId, question));
+		
 	}
 
 }

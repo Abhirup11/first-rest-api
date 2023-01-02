@@ -15,6 +15,8 @@ import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import ch.qos.logback.classic.Logger;
+
 @RestController
 public class SurveyResource {
 	
@@ -96,4 +98,18 @@ public class SurveyResource {
 		return ResponseEntity.noContent().build();
 	}
 	
+	
+	@RequestMapping(value="/surveys/{surveyId}/questions/{questionId}",method = RequestMethod.PUT)
+	public ResponseEntity<Object> updateSurveyQuestion(@PathVariable String surveyId, @PathVariable String questionId,
+					@RequestBody Question question){
+		
+		String questionid= surveyService.updateSurveyQuestion(surveyId,question,questionId);
+		if(questionid==null) {
+	
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+		}
+		URI location=ServletUriComponentsBuilder.fromCurrentRequest().path("/{questionId}").
+				buildAndExpand(questionId).toUri();
+		return ResponseEntity.created(location).build();
+	}
 }
